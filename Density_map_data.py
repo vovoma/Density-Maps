@@ -31,9 +31,9 @@ def getCoordinates(cit):
 
     if (cit == '0'):
         coor1 = coordAnt()
-        coor2 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1]))
-        coor3 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1])+radio)
-        coor4 = str(float(coor1.split(',')[0]))+ ","  + str(float(coor1.split(',')[1])+radio)
+        coor2 = str(redondearCoordenadas(float(coor1.split(',')[0])+radio))+ "," + str(float(coor1.split(',')[1]))
+        coor3 = str(redondearCoordenadas(float(coor1.split(',')[0])+radio))+ "," + str(redondearCoordenadas(float(coor1.split(',')[1])+radio))
+        coor4 = str(float(coor1.split(',')[0]))+ ","  + str(redondearCoordenadas(float(coor1.split(',')[1])+radio))
         
         heat = random.randint(1,10)
         
@@ -42,9 +42,9 @@ def getCoordinates(cit):
         return(jso)
     else:
         coor1 = coordHel()
-        coor2 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1]))
-        coor3 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1])+radio)
-        coor4 = str(float(coor1.split(',')[0]))+ ","  + str(float(coor1.split(',')[1])+radio)
+        coor2 = str(redondearCoordenadas(float(coor1.split(',')[0])+radio))+ "," + str(float(coor1.split(',')[1]))
+        coor3 = str(redondearCoordenadas(float(coor1.split(',')[0])+radio))+ "," + str(redondearCoordenadas(float(coor1.split(',')[1])+radio))
+        coor4 = str(float(coor1.split(',')[0]))+ ","  + str(redondearCoordenadas(float(coor1.split(',')[1])+radio))
         
         heat = random.randint(1,10)
         

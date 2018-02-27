@@ -7,11 +7,7 @@ app = Flask(__name__)
 
 @app.route('/api/bi/density', methods=['GET'])
 def heatmaps():
-    city = request.args.get('city')
-    print(city)
-    if (city!='0' and city!='1'):
-    	abort(400)
-    json = Density_map_data.getCoordinates(city)
+    json = Density_map_data.getCoordinates('0')
     return json
 
 if __name__ == '__main__':

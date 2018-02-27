@@ -26,12 +26,14 @@ def coordHel():
     return(localizacion)
 ###########################################
 def getCoordinates(cit):
+    radio = redondearCoordenadas(random.uniform(0.0001,0.008))
+    print(radio)
 
     if (cit == '0'):
         coor1 = coordAnt()
-        coor2 = coordAnt()
-        coor3 = coordAnt()
-        coor4 = coordAnt()
+        coor2 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1]))
+        coor3 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1])+radio)
+        coor4 = str(float(coor1.split(',')[0]))+ ","  + str(float(coor1.split(',')[1])+radio)
         
         heat = random.randint(1,10)
         
@@ -40,9 +42,9 @@ def getCoordinates(cit):
         return(jso)
     else:
         coor1 = coordHel()
-        coor2 = coordHel()
-        coor3 = coordHel()
-        coor4 = coordHel()
+        coor2 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1]))
+        coor3 = str(float(coor1.split(',')[0])+radio)+ "," + str(float(coor1.split(',')[1])+radio)
+        coor4 = str(float(coor1.split(',')[0]))+ ","  + str(float(coor1.split(',')[1])+radio)
         
         heat = random.randint(1,10)
         

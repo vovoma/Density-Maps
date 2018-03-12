@@ -29,7 +29,7 @@ async def main():
     # otherwise the eureka server will expel the service.
     # The default is 90s, so any time <90s is ok
     while True:
-        await asyncio.sleep(67)
+        await asyncio.sleep(10)
         await eureka.renew()
 
 try:

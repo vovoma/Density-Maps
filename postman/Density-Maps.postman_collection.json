@@ -1,0 +1,120 @@
+{
+	"info": {
+		"name": "Density Maps",
+		"_postman_id": "be83863d-07b7-4ccc-be5f-33875cb95e7e",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Check Antwerp Density",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b7f39144-b6e9-4d5c-a118-55ca5c0b2a27",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Coordinates are shown\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"coordinates\");",
+							"});",
+							"",
+							"pm.test(\"The number of coordinates is 4\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    console.log(jsonData[0].coordinates.length);",
+							"    pm.expect(jsonData[0].coordinates.length).to.eql(4);",
+							"});",
+							"",
+							"pm.test(\"Heat percentage is shown\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"HeatPercentage\");",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{url}}/density?city=0",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"density"
+					],
+					"query": [
+						{
+							"key": "city",
+							"value": "0",
+							"equals": true
+						}
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Check Helsinki Density",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "08fb44a4-8601-486f-8a58-423cc56da4bc",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Coordinates are shown\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"coordinates\");",
+							"});",
+							"",
+							"pm.test(\"The number of coordinates is 4\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    console.log(jsonData[0].coordinates.length);",
+							"    pm.expect(jsonData[0].coordinates.length).to.eql(4);",
+							"});",
+							"",
+							"pm.test(\"Heat percentage is shown\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"HeatPercentage\");",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{url}}/density?city=1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"density"
+					],
+					"query": [
+						{
+							"key": "city",
+							"value": "1",
+							"equals": true
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

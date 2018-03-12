@@ -1,0 +1,66 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "API for Fiwoo's Business Intelligence (BI) density maps Microservice",
+    "description": "This service returns a JSON with the coordinates of four points representing a square and a percentage with the traffic density in the defined square.",
+    "license": {
+      "name": "Apache License Version 2.0"
+    }
+  },
+  "host": "platform.fiwoo.eu",
+  "basePath": "/api/bi/",
+  "tags": [
+    {
+      "name": "BI-density maps controller",
+      "description": "BI-density maps Controller"
+    }
+  ],
+  "paths": {
+    "/density": {
+      "get": {
+        "tags": [
+          "BI-density maps controller"
+        ],
+        "summary": "get traffic density in Antwerp or Helsinki",
+        "operationId": "heatmaps",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "city",
+            "description": "city=0 for traffic in Antwerp, city=1 for traffic in Helsinki",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Traffic density",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coordinates": {
+                  "type": "array",
+                  "description": "Coordinates of four points inside the city.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "HeatPercentage": {
+                  "type": "string",
+                  "description": "Percentage representing traffic density."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    }
+  }
+}

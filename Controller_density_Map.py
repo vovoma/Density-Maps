@@ -44,7 +44,7 @@ def heatmaps():
     json = Density_map_data.getCoordinates('0')
     return json
 
-@app.route('/api/bi/swagger', methods=['GET'])
+@app.route('/api/bi/density/swagger', methods=['GET'])
 def get_swagger():
     swagger_json = open('BI_density_mapsV1.json', 'r').read()
     return swagger_json

@@ -1,11 +1,15 @@
-FROM python:3
-WORKDIR /opt
+FROM java:8
 
-RUN pip install flask requests wasp-eureka
-COPY Density_map_data.py /opt/
-COPY Controller_density_Map.py /opt/
-COPY BI_density_mapsV1.json /opt/
+RUN apt-get update
+RUN apt-get install -y maven
 
-EXPOSE 5000
+WORKDIR /
+EXPOSE 4444
+ADD . /opt/
+WORKDIR /opt/
+RUN ["mvn", "clean"]
+RUN mvn package -X -Dmaven.test.skip=true
+RUN mv target/DensityMap-0.0.1-SNAPSHOT.jar target/density_maps.jar
 
-CMD [ "python", "./Controller_density_Map.py" ]
+CMD java -jar target/density_maps.jar
+

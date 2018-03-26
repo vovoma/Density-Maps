@@ -138,7 +138,7 @@ public class DensityMapsController<Punto> {
 		return ResponseEntity.status(HttpStatus.OK).body(r1.redToJson2());
 	}
 	
-	@RequestMapping(value = "/densityMap", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"})
+	@RequestMapping(value = "/densityMap/reversed", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"})
 	@ResponseBody
 	public ResponseEntity getDensityMapReverse(@RequestBody String body, @RequestHeader("X-Authorization-s4c") String jwtHeader) throws IllegalArgumentException, UnsupportedEncodingException {		
 		//HMAC

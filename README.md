@@ -6,16 +6,14 @@ This repository contains the density maps microservice in the FIWOO platform
 
 ### Prerequisites
 - [Git](https://git-scm.com/)
-- [Python](python.org) Python >= 2.7
+- [Apache Maven 3.3.9]
+- [Java 1.8]
 
 ### Developing
-- Run `pip install flask requests` to install Flask dependences.
+Install Apache Maven and Java 1.8 in your host.
 
 ## Build & Development
-Run `python Controller_density_Map.py` to start the microservice.
-
-## Testing
-Run `python Test_density_maps.py -v` to run the unit tests.
+Run `mvn clean package` to generate the .jar file.
 
 ## Deployment with Docker
 
@@ -26,6 +24,6 @@ In order to deploy this microservice using Docker, follow this steps:
 
 		`docker pull fiwoo/density-maps`
 
-2. Run the image. Take into account that the microservice is started on port 5000.
+2. Run the image. Take into account that the microservice is started on port 4444. You can also configure Eureka URL and PORT using the environment variables as below: _EUREKAVHOST_ and _EUREKAPORT_
 
-		`sudo docker run -d --name density_maps -p 5000:5000 fiwoo/density-maps`
+		`sudo docker run -d --name density_maps -p 4444:4444 -e "EUREKA_VHOST=<eureka host url>" -e "EUREKA_PORT=<eureka port>" fiwoo/density-maps`

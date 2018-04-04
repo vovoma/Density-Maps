@@ -285,6 +285,7 @@ public class Red {
 		pj.add("coordinates", coordinates);
 		pj.addProperty("value", sensor.getValor());
 		double radio = Math.round(Math.random()*5+5);
+		//double radio = 10;
 		double coord11=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, bordeSensor(sensor).get(0).getFila())*1000000)/1000000;
 		double coord22=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(columnas, x1, x2, bordeSensor(sensor).get(0).getColumna())*1000000)/1000000;
 		pj.addProperty("range", radio);
@@ -313,6 +314,7 @@ public class Red {
 		coordinates.add(coord1);
 		coordinates.add(coord2);
 		double radio = Math.round(Math.random()*5+5);
+		//double radio = 10;
 
 		JsonObject pj = new JsonObject();
 		JsonArray ja1 = new JsonArray();
@@ -445,4 +447,7 @@ public class Red {
 		return r1.redToJson();
 		
 	}
+	
+	
+	
 }

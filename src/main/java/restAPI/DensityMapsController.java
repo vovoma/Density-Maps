@@ -6,7 +6,10 @@ import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -28,7 +31,10 @@ import maven.DensityMap.*;
 public class DensityMapsController<Punto> {
 
 	private static final String SECRET = "_JWT_TOKEN_KEY_";
+	private static final String APPLICATION_JSON_NGSI = "application/ngsi+json";
+	private static final String APPLICATION_JSON_LD = "application/ld+json";
 	
+	private HttpServletRequest context; 
 	
 	public DensityMapsController() {
 	}
@@ -51,19 +57,16 @@ public class DensityMapsController<Punto> {
 	         fr = new FileReader (archivo);
 	         br = new BufferedReader(fr);
 
-	         // Lectura del fichero
+	         // Reading file
 	         String linea;
 	         while((linea=br.readLine())!=null)
 	            SwaggerJson=SwaggerJson+"\n"+linea;
-	        	 //System.out.println(linea);
-	         //System.out.println(SwaggerJson);
 	      }
 	      catch(Exception e){
 	         e.printStackTrace();
 	      }finally{
-	         // En el finally cerramos el fichero, para asegurarnos
-	         // que se cierra tanto si todo va bien como si salta 
-	         // una excepcion.
+	         // In the finally we close the file to be sure that
+	         // it close although it creates an exception
 	         try{                    
 	            if( null != fr ){   
 	               fr.close();     
@@ -84,12 +87,12 @@ public class DensityMapsController<Punto> {
 	 * 	 "rule" : {rule_JSON} }	* 
 	 * 
 	 */
-	@RequestMapping(value = "/densityMap", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"})
+	@RequestMapping(value = "/densityMap", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"},  produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
 	@ResponseBody
 	public ResponseEntity getDensityMap(@RequestBody String body, @RequestHeader("X-Authorization-s4c") String jwtHeader) throws IllegalArgumentException, UnsupportedEncodingException {		
 		//HMAC
 		Algorithm algorithmHS = Algorithm.HMAC512(SECRET);
-		
+		String  acceptHeader= context.getHeader("Accept");
 		try {
 		    DecodedJWT jwt = JWT.decode(jwtHeader);
 		    String subject = jwt.getSubject();
@@ -109,7 +112,6 @@ public class DensityMapsController<Punto> {
 		y1=(double) jArray.get(0).getAsDouble();
 		x2=(double) jArray.get(1).getAsDouble();
 		Red r1= new Red(x1, x2, y1, y2);
-//		System.out.println("x1: "+x1+" x2: "+x2+" y1: "+y1+" y2: "+y2);
 		//extracting the sensors
 		jArray= (JsonArray)jRead.get("sensors");
 		ArrayList<maven.DensityMap.Punto> sensors= new ArrayList<maven.DensityMap.Punto>();
@@ -118,32 +120,29 @@ public class DensityMapsController<Punto> {
 			
 			JsonObject jo = (JsonObject) je;
 			double y=jo.get("lattitude").getAsDouble();
-//			System.out.println("lattitude: "+y);
 			double x=jo.get("longitude").getAsDouble();
-//			System.out.println("longitudede: "+x);
 			maven.DensityMap.Punto sensor1 =  ServiciosCoordenadas.CoordenadaAMatriz(r1.getFilas(), r1.getColumnas(), y1, y2, x1, x2, x, y);
-//			System.out.println("filaSensor:"+ sensor1.getFila());
-//			System.out.println("columnaSensor:"+ sensor1.getColumna());
-//			System.out.println("filas ,"+r1.getFilas()+" columnas, "+r1.getColumnas());
 			sensor1.setEsSensor(true);
 			sensor1.setValor(jo.get("value").getAsFloat());
 			sensor1.setAlcance(10);
 			sensors.add(sensor1);
 		}
-//		System.out.println(sensors.size());
-		
 		r1.asignarSensores(sensors);
 		r1.pintarRed();
 		r1.rodearSensores();
-		return ResponseEntity.status(HttpStatus.OK).body(r1.redToJson2());
+		String json = r1.redToJson2();
+		if(acceptHeader.equals("application/ld+json")) {
+			json = transformJsonLd(json);
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(json);
 	}
 	
-	@RequestMapping(value = "/densityMap/reversed", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"})
+	@RequestMapping(value = "/densityMap/reversed", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"} , produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
 	@ResponseBody
 	public ResponseEntity getDensityMapReverse(@RequestBody String body, @RequestHeader("X-Authorization-s4c") String jwtHeader) throws IllegalArgumentException, UnsupportedEncodingException {		
 		//HMAC
 		Algorithm algorithmHS = Algorithm.HMAC512(SECRET);
-		
+		String  acceptHeader= context.getHeader("Accept");
 		try {
 		    DecodedJWT jwt = JWT.decode(jwtHeader);
 		    String subject = jwt.getSubject();
@@ -163,7 +162,6 @@ public class DensityMapsController<Punto> {
 		y1=(double) jArray.get(0).getAsDouble();
 		x2=(double) jArray.get(1).getAsDouble();
 		Red r1= new Red(x1, x2, y1, y2);
-//		System.out.println("x1: "+x1+" x2: "+x2+" y1: "+y1+" y2: "+y2);
 		//extracting the sensors
 		jArray= (JsonArray)jRead.get("sensors");
 		ArrayList<maven.DensityMap.Punto> sensors= new ArrayList<maven.DensityMap.Punto>();
@@ -172,24 +170,21 @@ public class DensityMapsController<Punto> {
 			
 			JsonObject jo = (JsonObject) je;
 			double y=jo.get("lattitude").getAsDouble();
-//			System.out.println("lattitude: "+y);
 			double x=jo.get("longitude").getAsDouble();
-//			System.out.println("longitudede: "+x);
 			maven.DensityMap.Punto sensor1 =  ServiciosCoordenadas.CoordenadaAMatriz(r1.getFilas(), r1.getColumnas(), y1, y2, x1, x2, x, y);
-//			System.out.println("filaSensor:"+ sensor1.getFila());
-//			System.out.println("columnaSensor:"+ sensor1.getColumna());
-//			System.out.println("filas ,"+r1.getFilas()+" columnas, "+r1.getColumnas());
 			sensor1.setEsSensor(true);
 			sensor1.setValor(jo.get("value").getAsFloat());
 			sensor1.setAlcance(10);
 			sensors.add(sensor1);
-		}
-//		System.out.println(sensors.size());
-		
+		}		
 		r1.asignarSensores(sensors);
 		r1.pintarRed();
 		r1.rodearSensores();
-		return ResponseEntity.status(HttpStatus.OK).body(r1.redToJson());
+		String json = r1.redToJson();
+		if(acceptHeader.equals("application/ld+json")) {
+			json = transformJsonLd(json);
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(json);
 	}
 
 //	
@@ -220,4 +215,78 @@ public class DensityMapsController<Punto> {
 //		}
 //		return jwtHeader;
 //	}
+	
+	
+	//add the context of geojson to the (not ld) json and returns the jsonld as a string
+	private String transformJsonLd(String originalJson) {
+		JsonObject jsonobj = new JsonObject();
+		JsonParser jp = new JsonParser();
+		jsonobj = jp.parse(originalJson).getAsJsonObject();
+		jsonobj.addProperty("type", "Feature");
+		
+		JsonObject properties = new JsonObject();
+		properties.addProperty("title", "sensor");
+		properties.addProperty("description", "sensors");
+		jsonobj.add("properties", properties);
+		
+		JsonObject geometry = new JsonObject();
+		geometry.addProperty("type", "MultiPoint");
+		JsonArray coordinates = new JsonArray();
+		JsonArray sensorsRead =(JsonArray) jsonobj.get("sensors");
+		JsonArray auxcorw = new JsonArray();
+		for(JsonElement je : sensorsRead) {
+			JsonObject jo = (JsonObject)je;
+			JsonArray corrdread = (JsonArray)jo.get("coordinates");
+			coordinates.add(corrdread.get(0));
+			coordinates.add(corrdread.get(1));
+			auxcorw.add(corrdread);
+		}	
+		geometry.add("coordinates",auxcorw);
+		jsonobj.add("geometry", geometry);
+		
+		
+		jsonobj.add("@context" , getContextGeoJson());
+		return jsonobj.toString();
+	}
+	
+	
+	//Create the context used in geojson
+	private JsonObject getContextGeoJson() {
+		JsonObject context = new JsonObject();
+			
+		context.addProperty("geojson", "https://purl.org/geojson/vocab#");
+		context.addProperty("Feature", "geojson:Feature");
+		context.addProperty("FeatureCollection", "geojson:FeatureCollection");
+		context.addProperty("GeometryCollection", "geojson:GeometryCollection");
+		context.addProperty("LineString", "geojson:LineString");
+		context.addProperty("MultiLineString", "geojson:MultiLineString");
+		context.addProperty("MultiPoint", "geojson:MultiPoint");
+		context.addProperty("MultiPolygon", "geojson:MultiPolygon");
+		context.addProperty("Point", "geojson:Point");
+		context.addProperty("Polygon", "geojson:Polygon");
+		
+		JsonObject aux = new JsonObject();
+		aux.addProperty("@container", "@list" );
+		aux.addProperty("@id", "geojson:bbox" );		
+		context.add("bbox", aux);
+		
+		aux = new JsonObject();
+		aux.addProperty("@container", "@list" );
+		aux.addProperty("@id", "geojson:coordinates" );		
+		context.add("coordinates", aux);
+		
+		aux = new JsonObject();
+		aux.addProperty("@container", "@set" );
+		aux.addProperty("@id", "geojson:features" );
+		context.add("features",aux);
+		
+		context.addProperty("geometry", "geojson:geometry");
+		context.addProperty("id", "@id");
+		context.addProperty("properties", "geojson:properties");
+		context.addProperty("type", "@type");
+		context.addProperty("description", "http://purl.org/dc/terms/description");
+		context.addProperty("title", "http://purl.org/dc/terms/title");
+			
+		return context;
+	}
 }

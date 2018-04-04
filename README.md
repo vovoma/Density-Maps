@@ -24,6 +24,6 @@ In order to deploy this microservice using Docker, follow this steps:
 
 		`docker pull fiwoo/density-maps`
 
-2. Run the image. Take into account that the microservice is started on port 4444. You can also configure Eureka URL and PORT using the environment variables as below: _EUREKAVHOST_ and _EUREKAPORT_
+2. Run the image. Take into account that the microservice is started on port 4444. You can also configure Eureka URL and PORT using the environment variables as below: _EUREKAVHOST_ and _EUREKAPORT_. You also need to give as an environment variable the _SECRET_ for decoding the JWT.
 
-		`sudo docker run -d --name density_maps -p 4444:4444 -e "EUREKA_VHOST=<eureka host url>" -e "EUREKA_PORT=<eureka port>" fiwoo/density-maps`
+		`sudo docker run -d --name density_maps -p 4444:4444 -e "EUREKA_VHOST=<eureka host url>" -e "EUREKA_PORT=<eureka port>" -e "SECRET=<JWT SECRET>"fiwoo/density-maps`

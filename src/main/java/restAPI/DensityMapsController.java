@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.*;
+import com.google.gson.internal.LinkedTreeMap;
+
 import maven.DensityMap.Punto;
 import maven.DensityMap.*;
 
@@ -90,16 +94,9 @@ public class DensityMapsController<Punto> {
 	@RequestMapping(value = "/densityMap", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"},  produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
 	@ResponseBody
 	public ResponseEntity getDensityMap(@RequestBody String body, @RequestHeader("X-Authorization-s4c") String jwtHeader) throws IllegalArgumentException, UnsupportedEncodingException {		
-		//HMAC
-		Algorithm algorithmHS = Algorithm.HMAC512(SECRET);
 		String  acceptHeader= context.getHeader("Accept");
-		try {
-		    DecodedJWT jwt = JWT.decode(jwtHeader);
-		    String subject = jwt.getSubject();
-		    System.out.println(subject);
-		} catch (JWTDecodeException exception){
-		    //Invalid token
-		}
+		//We don't use the returned user_id but we do the JWT verification
+		decodeUserIdFromJWT(jwtHeader);
 		//Extracting coordinates of the map
 		double x1, y2, x2, y1;
 		JsonParser parser = new JsonParser();
@@ -140,16 +137,9 @@ public class DensityMapsController<Punto> {
 	@RequestMapping(value = "/densityMap/reversed", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"} , produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
 	@ResponseBody
 	public ResponseEntity getDensityMapReverse(@RequestBody String body, @RequestHeader("X-Authorization-s4c") String jwtHeader) throws IllegalArgumentException, UnsupportedEncodingException {		
-		//HMAC
-		Algorithm algorithmHS = Algorithm.HMAC512(SECRET);
 		String  acceptHeader= context.getHeader("Accept");
-		try {
-		    DecodedJWT jwt = JWT.decode(jwtHeader);
-		    String subject = jwt.getSubject();
-		    System.out.println(subject);
-		} catch (JWTDecodeException exception){
-		    //Invalid token
-		}
+		//We don't use the returned user_id but we do the JWT verification
+		decodeUserIdFromJWT(jwtHeader);
 		//Extracting coordinates of the map
 		double x1, y2, x2, y1;
 		JsonParser parser = new JsonParser();
@@ -187,34 +177,34 @@ public class DensityMapsController<Punto> {
 		return ResponseEntity.status(HttpStatus.OK).body(json);
 	}
 
-//	
-//	private String decodeUserIdFromJWT(String jwtHeader) {
-//		String user_id = "";
-//		//HMAC
-//		try {
-//			Algorithm algorithmHS = Algorithm.HMAC512(SECRET);
-//		} catch (IllegalArgumentException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (UnsupportedEncodingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//		try {
-//		    DecodedJWT jwt = JWT.decode(jwtHeader);
-//		    // user is inside the jwt in the sub field
-//		    String serializedUser = jwt.getSubject();
-//		    Gson gson = new GsonBuilder().serializeNulls().create();
-//			gson.serializeNulls();
-//			Object user = gson.fromJson(serializedUser, Object.class);
-//			LinkedTreeMap<Object, Object> user_map = (LinkedTreeMap<Object, Object>) user;
-//			user_id = (String) user_map.get("id");
-//		} catch (JWTDecodeException exception){
-//		    //Invalid token
-//		}
-//		return jwtHeader;
-//	}
+	private String decodeUserIdFromJWT(String jwtHeader) {
+		jwtHeader = jwtHeader.replace("Bearer ","");
+		String user_id = "";
+		//HMAC
+		try {
+			Algorithm algorithmHS = Algorithm.HMAC512(SECRET);
+			JWTVerifier verifier = JWT.require(algorithmHS)
+			        .withIssuer("s4c.microservices.authorization")
+			        .build(); //Reusable verifier instance
+			DecodedJWT jwt = verifier.verify(jwtHeader);
+			
+		    //DecodedJWT jwt = JWT.decode(jwtHeader);
+		    // user is inside the jwt in the sub field
+		    String serializedUser = jwt.getSubject();
+		    Gson gson = new GsonBuilder().serializeNulls().create();
+			gson.serializeNulls();
+			Object user = gson.fromJson(serializedUser, Object.class);
+			LinkedTreeMap<Object, Object> user_map = (LinkedTreeMap<Object, Object>) user;
+			user_id = (String) user_map.get("id").toString();
+			byte[] encodedBytes = Base64.encodeBase64(user_id.getBytes());
+			user_id = new String(encodedBytes);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} 
+		return user_id;
+	}
 	
 	
 	//add the context of geojson to the (not ld) json and returns the jsonld as a string

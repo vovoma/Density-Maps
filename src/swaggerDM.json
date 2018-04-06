@@ -8,8 +8,8 @@
       "name": "Apache License Version 2.0"
     }
   },
-  "host": "localhost:4444",
-  "basePath": "/api/bi/density",
+  "host": "us2.fiwoo.eu:5000",
+  "basePath": "/bi/density",
   "paths": {
     "/densityMap": {
       "post": {
@@ -22,7 +22,9 @@
           "application/json"
         ],
         "produces": [
-          "application/json"
+          "application/ld+json",
+          "application/json",
+          "application/ngsi+json"
         ],
         "parameters": [
           {
@@ -51,6 +53,93 @@
           },
           "201": {
             "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/densityMap/reversed": {
+      "post": {
+        "tags": [
+          "density-maps-controller"
+        ],
+        "summary": "getDensityMapReverse",
+        "operationId": "getDensityMapReverseUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/ld+json",
+          "application/json",
+          "application/ngsi+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Authorization-s4c",
+            "in": "header",
+            "description": "X-Authorization-s4c",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ResponseEntity"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/swagger": {
+      "get": {
+        "tags": [
+          "density-maps-controller"
+        ],
+        "summary": "getSwagger",
+        "operationId": "getSwaggerUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ResponseEntity"
+            }
           },
           "401": {
             "description": "Unauthorized"

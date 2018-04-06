@@ -157,18 +157,12 @@ public class Red {
 	//POST: returns a list of points surrounding "sensor" in the matrix
 	public ArrayList<Punto> bordeSensor( final Punto sensor){
 		ArrayList<Punto> aux = new ArrayList<Punto>();
-		if(sensor.getAlcance()>0) {
-			
+		if(sensor.getAlcance()>0) {			
 			for(int i=0;i<filas;i++) {
-				//System.out.println("eoo");
-				for(int j=0;j<columnas;j++) {
-					//System.out.println("eoo");
+				for(int j=0;j<columnas;j++) 
+				{
 					if(puntos[i][j].distancia(sensor)<=sensor.getAlcance()+offset&&puntos[i][j].distancia(sensor)>=sensor.getAlcance()-offset) {
-						//System.out.println("eoo");
 						aux.add(puntos[i][j]);
-//						double coord1 = ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, i);
-//						double coord2 = ServiciosCoordenadas.MatrizACoordenadaX(columnas, x1, x2,j);
-//						System.out.println(i+", "+j+", "+", "+coord1+", "+coord2);
 						if(puntos[i][j].distancia(puntos[i][j].getSensorMasCercano())>puntos[i][j].getSensorMasCercano().getAlcance()) {
 							puntos[i][j].setValor(sensor.getValor());
 							
@@ -229,19 +223,19 @@ public class Red {
 	public static double angulo(Punto sensor, Punto punto) {
 		int x=punto.getColumna()-sensor.getColumna();
 		int y=punto.getFila()-sensor.getFila();
-		//primer cuadrante
+		//first quadrant
 		if(x>0&&y>0) {
 			return(Math.atan((double)y/x));
 		}
-		//segundo cuadrante
+		//second quadrant
 		else if(x<0&&y>0) {
 			return(Math.PI+Math.atan((double)y/x));
 		}
-		//tercer cuadrante
+		//third quadrant
 		else if(x<0&&y<0) {
 			return(Math.PI+Math.atan((double)y/x));
 		}
-		//cuarto cuadrante
+		//fourth quadrant
 		else if(x>0&&y<0) {
 			return(Math.atan((double)y/x)+2*Math.PI);
 		}
@@ -277,32 +271,65 @@ public class Red {
 		//multiply by 10E6, round and divide by 10E6
 		double coord1 = (double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, sensor.getFila())*1000000)/1000000;
 		double coord2 =(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaX(columnas, x1, x2, sensor.getColumna())*1000000)/1000000;
-		coordinates.add(coord2);
-		coordinates.add(coord1);
 		JsonObject pj = new JsonObject();
-		JsonArray ja1 = new JsonArray();
-		JsonArray ja2 = new JsonArray();
-		pj.add("coordinates", coordinates);
-		pj.addProperty("value", sensor.getValor());
-		double radio = Math.round(Math.random()*5+5);
-		//double radio = 10;
-		double coord11=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, bordeSensor(sensor).get(0).getFila())*1000000)/1000000;
-		double coord22=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(columnas, x1, x2, bordeSensor(sensor).get(0).getColumna())*1000000)/1000000;
-		pj.addProperty("range", radio);
-		for(Punto p: this.bordeSensor(sensor)) {
+		if(coord1>=y1&&coord1<=y2&&coord2<=x2&&coord2>=x1)
+		{
+			coordinates.add(coord2);
+			coordinates.add(coord1);
+			JsonArray ja1 = new JsonArray();
+			JsonArray ja2 = new JsonArray();
+			pj.add("coordinates", coordinates);
+			pj.addProperty("value", sensor.getValor());
+			double radio = Math.round(Math.random()*5+5);
+			//double radio = 10;
+			double coord11=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, bordeSensor(sensor).get(0).getFila())*1000000)/1000000;
+			double coord22=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(columnas, x1, x2, bordeSensor(sensor).get(0).getColumna())*1000000)/1000000;
+			pj.addProperty("range", radio);
+			for(Punto p: this.bordeSensor(sensor)) {
+				JsonArray aux = new JsonArray();
+				aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaX(columnas, x1, x2, p.getColumna())*1000000)/1000000);
+				aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, p.getFila())*1000000)/1000000);
+				
+				ja1.add(aux);
+			}
 			JsonArray aux = new JsonArray();
-			aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaX(columnas, x1, x2, p.getColumna())*1000000)/1000000);
-			aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, p.getFila())*1000000)/1000000);
-			
+			aux.add(coord22);
+			aux.add(coord11);
 			ja1.add(aux);
+			ja2.add(ja1);
+			pj.add("edge", ja2);			
+			return pj;
 		}
-		JsonArray aux = new JsonArray();
-		aux.add(coord22);
-		aux.add(coord11);
-		ja1.add(aux);
-		ja2.add(ja1);
-		pj.add("edge", ja2);			
-		return pj;
+		else
+		{
+				coordinates.add(coord1);
+				coordinates.add(coord2);
+				double radio = Math.round(Math.random()*5+5);
+				JsonArray ja1 = new JsonArray();
+				JsonArray ja2 = new JsonArray();
+				pj.add("coordinates", coordinates);
+				pj.addProperty("value", sensor.getValor());
+				double coord11=0;
+				double coord22=0;
+				pj.addProperty("range", radio);
+
+				for(Punto p: this.bordeSensor(sensor)) {
+					JsonArray aux = new JsonArray();
+					
+					aux.add(0);
+					aux.add(0);
+					ja1.add(aux);
+				}
+				JsonArray aux = new JsonArray();
+				aux.add(coord11);
+				aux.add(coord22);
+				ja1.add(aux);
+				ja2.add(ja1);
+				pj.add("edge", ja2);
+				pj.addProperty("Error", "sensor's coordinates out of range");
+				return pj;			
+		}
+		
 		
 	}
 	//returns a json that represents a sensor and his edge with the order of coordinates reversed
@@ -311,34 +338,65 @@ public class Red {
 		JsonArray coordinates = new JsonArray();
 		double coord1 = (double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, sensor.getFila())*1000000)/1000000;
 		double coord2 =(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaX(columnas, x1, x2, sensor.getColumna())*1000000)/1000000;
-		coordinates.add(coord1);
-		coordinates.add(coord2);
-		double radio = Math.round(Math.random()*5+5);
-		//double radio = 10;
-
 		JsonObject pj = new JsonObject();
-		JsonArray ja1 = new JsonArray();
-		JsonArray ja2 = new JsonArray();
-		pj.add("coordinates", coordinates);
-		pj.addProperty("value", sensor.getValor());
-		double coord11=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, bordeSensor(sensor).get(0).getFila())*1000000)/1000000;
-		double coord22=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(columnas, x1, x2, bordeSensor(sensor).get(0).getColumna())*1000000)/1000000;
-		pj.addProperty("range", radio);
+		if(coord1>=y1&&coord1<=y2&&coord2<=x2&&coord2>=x1)
+		{
+			coordinates.add(coord1);
+			coordinates.add(coord2);
+			double radio = Math.round(Math.random()*5+5);
+			JsonArray ja1 = new JsonArray();
+			JsonArray ja2 = new JsonArray();
+			pj.add("coordinates", coordinates);
+			pj.addProperty("value", sensor.getValor());
+			double coord11=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, bordeSensor(sensor).get(0).getFila())*1000000)/1000000;
+			double coord22=(double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(columnas, x1, x2, bordeSensor(sensor).get(0).getColumna())*1000000)/1000000;
+			pj.addProperty("range", radio);
 
-		for(Punto p: this.bordeSensor(sensor)) {
+			for(Punto p: this.bordeSensor(sensor)) {
+				JsonArray aux = new JsonArray();
+				
+				aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, p.getFila())*1000000)/1000000);
+				aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaX(columnas, x1, x2, p.getColumna())*1000000)/1000000);
+				ja1.add(aux);
+			}
 			JsonArray aux = new JsonArray();
-			
-			aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaY(filas, y1, y2, p.getFila())*1000000)/1000000);
-			aux.add((double)Math.round(ServiciosCoordenadas.MatrizACoordenadaX(columnas, x1, x2, p.getColumna())*1000000)/1000000);
+			aux.add(coord11);
+			aux.add(coord22);
 			ja1.add(aux);
+			ja2.add(ja1);
+			pj.add("edge", ja2);			
+			return pj;
 		}
-		JsonArray aux = new JsonArray();
-		aux.add(coord11);
-		aux.add(coord22);
-		ja1.add(aux);
-		ja2.add(ja1);
-		pj.add("edge", ja2);			
-		return pj;
+		else
+		{
+			coordinates.add(coord1);
+			coordinates.add(coord2);
+			double radio = Math.round(Math.random()*5+5);
+			JsonArray ja1 = new JsonArray();
+			JsonArray ja2 = new JsonArray();
+			pj.add("coordinates", coordinates);
+			pj.addProperty("value", sensor.getValor());
+			double coord11=0;
+			double coord22=0;
+			pj.addProperty("range", radio);
+
+			for(Punto p: this.bordeSensor(sensor)) {
+				JsonArray aux = new JsonArray();
+				
+				aux.add(0);
+				aux.add(0);
+				ja1.add(aux);
+			}
+			JsonArray aux = new JsonArray();
+			aux.add(coord11);
+			aux.add(coord22);
+			ja1.add(aux);
+			ja2.add(ja1);
+			pj.add("edge", ja2);
+			pj.addProperty("Error", "sensor's coordinates out of range");
+			return pj;			
+		}
+		
 	}
 	//returns a String
 	public String redToJson() {

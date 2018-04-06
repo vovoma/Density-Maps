@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +39,7 @@ public class DensityMapsController<Punto> {
 	private static final String APPLICATION_JSON_NGSI = "application/ngsi+json";
 	private static final String APPLICATION_JSON_LD = "application/ld+json";
 	
+	@Autowired
 	private HttpServletRequest context; 
 	
 	public DensityMapsController() {
@@ -91,86 +93,26 @@ public class DensityMapsController<Punto> {
 	 * 	 "rule" : {rule_JSON} }	* 
 	 * 
 	 */
-	@RequestMapping(value = "/densityMap", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"},  produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
+	@RequestMapping(value = "/densityMap", method = RequestMethod.POST,  produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
 	@ResponseBody
 	public ResponseEntity getDensityMap(@RequestBody String body, @RequestHeader("X-Authorization-s4c") String jwtHeader) throws IllegalArgumentException, UnsupportedEncodingException {		
 		String  acceptHeader= context.getHeader("Accept");
 		//We don't use the returned user_id but we do the JWT verification
 		decodeUserIdFromJWT(jwtHeader);
-		//Extracting coordinates of the map
-		double x1, y2, x2, y1;
-		JsonParser parser = new JsonParser();
-		JsonObject jRead = parser.parse(body).getAsJsonObject();
-		JsonArray jArray = new JsonArray();
-		jArray= (JsonArray) jRead.get("A");
-		y2=(double) jArray.get(0).getAsDouble();
-		x1=(double) jArray.get(1).getAsDouble();
-		jArray= (JsonArray) jRead.get("B");
-		y1=(double) jArray.get(0).getAsDouble();
-		x2=(double) jArray.get(1).getAsDouble();
-		Red r1= new Red(x1, x2, y1, y2);
-		//extracting the sensors
-		jArray= (JsonArray)jRead.get("sensors");
-		ArrayList<maven.DensityMap.Punto> sensors= new ArrayList<maven.DensityMap.Punto>();
-		for(JsonElement je : jArray)
-		{
-			
-			JsonObject jo = (JsonObject) je;
-			double y=jo.get("lattitude").getAsDouble();
-			double x=jo.get("longitude").getAsDouble();
-			maven.DensityMap.Punto sensor1 =  ServiciosCoordenadas.CoordenadaAMatriz(r1.getFilas(), r1.getColumnas(), y1, y2, x1, x2, x, y);
-			sensor1.setEsSensor(true);
-			sensor1.setValor(jo.get("value").getAsFloat());
-			sensor1.setAlcance(10);
-			sensors.add(sensor1);
-		}
-		r1.asignarSensores(sensors);
-		r1.pintarRed();
-		r1.rodearSensores();
-		String json = r1.redToJson2();
+		String json = Red.redConstructor(body);
 		if(acceptHeader.equals("application/ld+json")) {
 			json = transformJsonLd(json);
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(json);
 	}
 	
-	@RequestMapping(value = "/densityMap/reversed", method = RequestMethod.POST, headers="Accept=application/json", consumes = {"application/json"} , produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
+	@RequestMapping(value = "/densityMap/reversed", method = RequestMethod.POST, produces= {MediaType.APPLICATION_JSON_VALUE,APPLICATION_JSON_LD,APPLICATION_JSON_NGSI})
 	@ResponseBody
 	public ResponseEntity getDensityMapReverse(@RequestBody String body, @RequestHeader("X-Authorization-s4c") String jwtHeader) throws IllegalArgumentException, UnsupportedEncodingException {		
 		String  acceptHeader= context.getHeader("Accept");
 		//We don't use the returned user_id but we do the JWT verification
 		decodeUserIdFromJWT(jwtHeader);
-		//Extracting coordinates of the map
-		double x1, y2, x2, y1;
-		JsonParser parser = new JsonParser();
-		JsonObject jRead = parser.parse(body).getAsJsonObject();
-		JsonArray jArray = new JsonArray();
-		jArray= (JsonArray) jRead.get("A");
-		y2=(double) jArray.get(0).getAsDouble();
-		x1=(double) jArray.get(1).getAsDouble();
-		jArray= (JsonArray) jRead.get("B");
-		y1=(double) jArray.get(0).getAsDouble();
-		x2=(double) jArray.get(1).getAsDouble();
-		Red r1= new Red(x1, x2, y1, y2);
-		//extracting the sensors
-		jArray= (JsonArray)jRead.get("sensors");
-		ArrayList<maven.DensityMap.Punto> sensors= new ArrayList<maven.DensityMap.Punto>();
-		for(JsonElement je : jArray)
-		{
-			
-			JsonObject jo = (JsonObject) je;
-			double y=jo.get("lattitude").getAsDouble();
-			double x=jo.get("longitude").getAsDouble();
-			maven.DensityMap.Punto sensor1 =  ServiciosCoordenadas.CoordenadaAMatriz(r1.getFilas(), r1.getColumnas(), y1, y2, x1, x2, x, y);
-			sensor1.setEsSensor(true);
-			sensor1.setValor(jo.get("value").getAsFloat());
-			sensor1.setAlcance(10);
-			sensors.add(sensor1);
-		}		
-		r1.asignarSensores(sensors);
-		r1.pintarRed();
-		r1.rodearSensores();
-		String json = r1.redToJson();
+		String json = Red.redConstructorReverse(body);
 		if(acceptHeader.equals("application/ld+json")) {
 			json = transformJsonLd(json);
 		}

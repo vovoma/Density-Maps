@@ -1,4 +1,4 @@
-package maven.DensityMap;
+﻿package maven.DensityMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -173,11 +173,17 @@ public class Red {
 				}
 			}
 		}
-		aux.sort(new Comparator<Punto>() {
+
+		Collections.sort(aux, new Comparator<Punto>() {
 			public int compare(Punto p1, Punto p2) {
 				return (new Double(Red.angulo(sensor, p1)).compareTo(new Double (Red.angulo(sensor, p2))));
 			}
 		});
+		/*aux.sort(new Comparator<Punto>() {
+			public int compare(Punto p1, Punto p2) {
+				return (new Double(Red.angulo(sensor, p1)).compareTo(new Double (Red.angulo(sensor, p2))));
+			}
+		});*/
 		return (aux);
 	}
 	public void rodearSensor(Punto sensor) {
